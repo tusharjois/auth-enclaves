@@ -1,0 +1,30 @@
+enclave {
+    include "srp.h"
+    from "sgx_tstdc.edl" import *;
+    trusted {
+        /* define ECALLs here. */
+        public int ecall_srp_user_new([in, string]const char *username,
+                             [in, count=len_password]const unsigned char *bytes_password, int len_password);
+        public int ecall_srp_verifier_new([in, string]const char *username,
+                                           [in, count=len_s]const unsigned char *bytes_s, int len_s,
+                                           [in, count=len_v]const unsigned char *bytes_v, int len_v,
+                                           [in, count=len_A]const unsigned char *bytes_A, int len_A,
+                                           [out]unsigned char **bytes_B, [out]int *len_B);
+        public int ecall_srp_user_start_authentication([in, string]const char *username,
+                                         [out]unsigned char **bytes_A, [out]int *len_A);
+
+        public int ecall_srp_user_process_challenge([in, count=len_s]const unsigned char *bytes_s, int len_s,
+                                            [in, count=len_B]const unsigned char *bytes_B, int len_B,
+                                            [out]unsigned char **bytes_M, [out]int *len_M);
+
+        public int ecall_srp_verifier_verify_session([in, count=32]const unsigned char *user_M, [out]unsigned char **bytes_HAMK);
+        public void ecall_srp_user_verify_session([in, count=32]const unsigned char *bytes_HAMK);
+        public int ecall_srp_user_is_authenticated(void);
+    };
+
+    untrusted {
+        /* define OCALLs here. */
+        void ocall_print([in, string]const char* str);
+        void ocall_allocate_untrusted([out]unsigned char** bytes, size_t nbytes);
+    };
+};
